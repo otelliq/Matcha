@@ -3,7 +3,14 @@ import { ApiErrorResponse, ApiError } from "./types";
 let accessToken: string | null = null;
 
 export class ApiClient {
-  private static baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  private static baseUrl = process.env.NEXT_PUBLIC_API_URL || "/api/v1";
+
+  private static getStoredRefreshToken(): string | null {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return sessionStorage.getItem("refresh_token");
+  }
 
   static setAccessToken(token: string | null) {
     accessToken = token;
@@ -73,10 +80,15 @@ export class ApiClient {
 
   static async refreshToken(): Promise<boolean> {
     try {
+      const refresh = this.getStoredRefreshToken();
+      if (!refresh) {
+        return false;
+      }
+
       const response = await fetch(`${this.baseUrl}/auth/token/refresh/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh: "" }), // Refresh token comes from cookie
+        body: JSON.stringify({ refresh }),
         credentials: "include",
       });
 
@@ -84,8 +96,20 @@ export class ApiClient {
         return false;
       }
 
-      const { access } = await response.json();
+      const payload = await response.json();
+      const access = payload?.access as string | undefined;
+      const nextRefresh = payload?.refresh as string | undefined;
+
+      if (!access) {
+        return false;
+      }
+
       this.setAccessToken(access);
+
+      if (nextRefresh && typeof window !== "undefined") {
+        sessionStorage.setItem("refresh_token", nextRefresh);
+      }
+
       return true;
     } catch (err) {
       console.error("Token refresh failed:", err);

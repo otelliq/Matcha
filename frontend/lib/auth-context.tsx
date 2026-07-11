@@ -77,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = data as { access: string; refresh: string };
       ApiClient.setAccessToken(response.access);
       sessionStorage.setItem("access_token", response.access);
+      sessionStorage.setItem("refresh_token", response.refresh);
 
       // Refresh token is set in httpOnly cookie by the proxy endpoint
       // Get user profile

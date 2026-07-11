@@ -23,6 +23,11 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", True)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+CORS_ALLOWED_ORIGINS = env_list(
+    "DJANGO_CORS_ALLOWED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000",
+)
+CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -31,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "channels",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
@@ -45,6 +51,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "apps.core.middleware.ApiExceptionMiddleware",

@@ -126,8 +126,12 @@ npm install
 Create `.env.local`:
 
 ```
-NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_API_URL=/api/v1
+BACKEND_INTERNAL_URL=http://localhost:8000
 ```
+
+- `NEXT_PUBLIC_API_URL` defaults to `/api/v1` and should stay same-origin in most setups.
+- `BACKEND_INTERNAL_URL` is used by Next.js rewrites to proxy `/api/v1/*` to Django.
 
 ### Development
 

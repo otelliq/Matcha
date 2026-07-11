@@ -118,7 +118,10 @@ class TokenRefreshAPIView(APIView):
 
     def post(self, request):
         serializer = TokenRefreshSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as exc:
+            raise AuthenticationFailed("The refresh token is invalid or expired.") from exc
         return Response(serializer.validated_data)
 
 

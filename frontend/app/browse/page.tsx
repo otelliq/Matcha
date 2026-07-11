@@ -19,6 +19,7 @@ const SORTS = [
 export default function BrowsePage() {
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
   const [sort, setSort] = useState("same_area");
@@ -33,6 +34,7 @@ export default function BrowsePage() {
 
   const loadProfiles = async (newOffset = 0) => {
     setIsLoading(true);
+    setLoadError(null);
     try {
       const query: SuggestionsQuery = {
         sort: sort as any,
@@ -47,7 +49,13 @@ export default function BrowsePage() {
 
       const { data, error } = await ApiClient.getSuggestions(query);
       if (error) {
+        setLoadError(error.message || "Failed to load profiles.");
         showError(error);
+        if (newOffset === 0) {
+          setProfiles([]);
+          setHasMore(false);
+          setOffset(0);
+        }
       } else {
         const response = data as any;
         if (newOffset === 0) {
@@ -59,6 +67,7 @@ export default function BrowsePage() {
         setOffset(newOffset + response.results.length);
       }
     } catch (err) {
+      setLoadError("Failed to load profiles. Please try again.");
       addToast("Failed to load profiles", "error");
     } finally {
       setIsLoading(false);
@@ -197,9 +206,22 @@ export default function BrowsePage() {
           </div>
         )}
 
+        {loadError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 flex items-center justify-between gap-4">
+            <p>{loadError}</p>
+            <Button variant="secondary" onClick={() => loadProfiles(0)}>
+              Retry
+            </Button>
+          </div>
+        )}
+
         {isLoading && profiles.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">Loading profiles...</p>
+          </div>
+        ) : profiles.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">No profiles found for the current filters.</p>
           </div>
         ) : (
           <>

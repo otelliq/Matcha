@@ -35,3 +35,11 @@ class CandidateProfileSerializer(ProfilePublicSerializer):
     distance_km = serializers.DecimalField(max_digits=8, decimal_places=2, read_only=True, allow_null=True)
     same_area = serializers.BooleanField(read_only=True)
     match_score = serializers.DecimalField(max_digits=8, decimal_places=2, read_only=True)
+
+    class Meta(ProfilePublicSerializer.Meta):
+        fields = ProfilePublicSerializer.Meta.fields + [
+            "shared_tags_count",
+            "distance_km",
+            "same_area",
+            "match_score",
+        ]
